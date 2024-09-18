@@ -273,7 +273,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   VideoPlayerController.asset(this.dataSource,
       {this.package,
       Future<ClosedCaptionFile>? closedCaptionFile,
-      this.videoPlayerOptions})
+      this.videoPlayerOptions,
+      this.updateInterval = defaultUpdateInterval,})
       : _closedCaptionFileFuture = closedCaptionFile,
         dataSourceType = DataSourceType.asset,
         formatHint = null,
@@ -296,6 +297,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     Future<ClosedCaptionFile>? closedCaptionFile,
     this.videoPlayerOptions,
     this.httpHeaders = const <String, String>{},
+    this.updateInterval = defaultUpdateInterval,
   })  : _closedCaptionFileFuture = closedCaptionFile,
         dataSourceType = DataSourceType.network,
         package = null,
@@ -316,6 +318,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     Future<ClosedCaptionFile>? closedCaptionFile,
     this.videoPlayerOptions,
     this.httpHeaders = const <String, String>{},
+    this.updateInterval = defaultUpdateInterval,
   })  : _closedCaptionFileFuture = closedCaptionFile,
         dataSource = url.toString(),
         dataSourceType = DataSourceType.network,
@@ -329,7 +332,9 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   VideoPlayerController.file(File file,
       {Future<ClosedCaptionFile>? closedCaptionFile,
       this.videoPlayerOptions,
-      this.httpHeaders = const <String, String>{}})
+      this.httpHeaders = const <String, String>{},
+      this.updateInterval = defaultUpdateInterval,
+      })
       : _closedCaptionFileFuture = closedCaptionFile,
         dataSource = Uri.file(file.absolute.path).toString(),
         dataSourceType = DataSourceType.file,
@@ -342,7 +347,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// This will load the video from the input content-URI.
   /// This is supported on Android only.
   VideoPlayerController.contentUri(Uri contentUri,
-      {Future<ClosedCaptionFile>? closedCaptionFile, this.videoPlayerOptions})
+      {Future<ClosedCaptionFile>? closedCaptionFile, this.videoPlayerOptions, this.updateInterval = defaultUpdateInterval,})
       : assert(defaultTargetPlatform == TargetPlatform.android,
             'VideoPlayerController.contentUri is only supported on Android.'),
         _closedCaptionFileFuture = closedCaptionFile,
@@ -375,6 +380,9 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   /// Only set for [asset] videos. The package that the asset was loaded from.
   final String? package;
+
+  /// Determines how often the [VideoPlayer] will update its position during playback. Defaults to 500 ms.
+  final Duration updateInterval;
 
   Future<ClosedCaptionFile>? _closedCaptionFileFuture;
   ClosedCaptionFile? _closedCaptionFile;
@@ -578,7 +586,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       // Cancel previous timer.
       _timer?.cancel();
       _timer = Timer.periodic(
-        const Duration(milliseconds: 500),
+        updateInterval,
         (Timer timer) async {
           if (_isDisposed) {
             return;
@@ -1190,3 +1198,6 @@ class ClosedCaption extends StatelessWidget {
     );
   }
 }
+
+/// Default update interval used to determine how often the [VideoPlayer] updates during playback.
+const Duration defaultUpdateInterval = Duration(milliseconds: 500);

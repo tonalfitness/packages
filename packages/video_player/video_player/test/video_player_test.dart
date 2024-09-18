@@ -83,6 +83,9 @@ class FakeController extends ValueNotifier<VideoPlayerValue>
   Future<void> setClosedCaptionFile(
     Future<ClosedCaptionFile>? closedCaptionFile,
   ) async {}
+  
+  @override
+  Duration get updateInterval => const Duration(milliseconds: 500);
 }
 
 Future<ClosedCaptionFile> _loadClosedCaption() async =>
